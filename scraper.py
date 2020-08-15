@@ -11,7 +11,7 @@ url = 'https://blackdirectory.com/listing/'
 # Connect to the URL
 response = requests.get(url)
 
-print(response)
+print(response.text)
 
 # Parse HTML and save to BeautifulSoup object¶
 # soup = BeautifulSoup(response.text, "html.parser")
