@@ -3,15 +3,16 @@ import requests
 import urllib.request
 import time
 from bs4 import BeautifulSoup
+from variables import urlOfCities
 
 # Set the URL you want to webscrape from
-url = 'https://blackdirectory.com/listing/'
-
 
 # Connect to the URL
-response = requests.get(url)
+response = requests.get(urlOfCities)
 
-print(response.text)
+soup = bs4.BeautifulSoup(response.text, 'lxml')
+
+
 
 # Parse HTML and save to BeautifulSoup object¶
 # soup = BeautifulSoup(response.text, "html.parser")
