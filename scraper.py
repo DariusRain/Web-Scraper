@@ -5,16 +5,19 @@ import time
 from bs4 import BeautifulSoup
 from variables import urlOfCities
 
-# Set the URL you want to webscrape from
-
 # Connect to the URL
-response = requests.get(urlOfCities)
 
-soup = bs4.BeautifulSoup(response.text, 'lxml')
+def getCityLinks():
+    res = requests.get(urlOfCities)
+
+    soup = bs4.BeautifulSoup(res.text, 'lxml')
+
+
+    for i in soup.select('#')
 
 
 
-# Parse HTML and save to BeautifulSoup object¶
+# Parse HTML and save to BeautifulSoup object
 # soup = BeautifulSoup(response.text, "html.parser")
 
 # # To download the whole data set, let's do a for loop through all a tags
