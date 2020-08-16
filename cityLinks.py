@@ -13,7 +13,7 @@ def getCityLinks():
 
     soup = BeautifulSoup(res.text, 'lxml')
 
-    linksEl = soup.find(attrs={"banner-type": "skyscraper"}).next_element.next_element.find_all("a")
+    linksEl = soup.find_all(attrs={"banner-type": "skyscraper"}).next_element.next_element.find_all("a")
 
     extractedLinks = []
 
