@@ -55,7 +55,8 @@ def getListings():
         soup = BeautifulSoup(response.text, "lxml")
         
         if soup.select(pathOfErrorMessage) == None:
-           for listing in soup.find("div", pathOfListings).find_all("div", pathOfListingItem)
+           for item in soup.find("div", pathOfListings).find_all("div", pathOfListingItem):
+               print("")
         print("Sleeping...")
         time.sleep(60)
     print(extracted)
