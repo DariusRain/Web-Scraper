@@ -45,22 +45,23 @@ def getListings():
         error = soup.select(pathOfErrorMessage)
         if len(error) == 0:
            for item in soup.find_all("div", pathOfListingItems):
+                print(item)
                 buisinessName = item.find("a", pathToBuisinessName)
-                image = item.select(pathToImage)
+                image = item.find("img", pathToImage)
                 website = item.find("a", pathToWebsite)
                 phoneNumber = item.find("a", pathToPhoneNumber)
                 description = item.find("div", pathToDescription)
                 # category = item.find("div", pathToCategories).find_all("a")
                 parsedAddress = stateParser(item.find(pathToAddress).get_text())
                 # print({"name": buisinessName, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })
-                if parsedAddress == None or buisinessName == None or phoneNumber == None:
+                if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None:
                         print("Skipping buisiness w/ out required values...")
                         continue
                 buisinessName = buisinessName.get_text().strip()
                 phoneNumber = phoneNumber.get_text().strip()
                 description = description.get_text().strip()
                 website = website.get("href").strip()
-                print(image)
+                image = image["data-src"].strip()
                 # category = category[0].get_text().strip()
                 state = parsedAddress["state"]
                 address = parsedAddress["address"]
