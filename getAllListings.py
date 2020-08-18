@@ -1,8 +1,9 @@
 # Attempting to do an all in one, good suggestion @GaberialSherman
 import requests
 import time
+from addressParser import stateParser
 from bs4 import BeautifulSoup
-from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage, pathOfListingItem
+from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
 
 
 
@@ -28,24 +29,12 @@ def getListings():
     #               },
     #    }, 
 
-    states = {}
+    extracted = {}
     counter = 0
 
-    # Approach 1
-    # Scape all links for each city then scrape those links as well
-    # NOTE: Noticed this may be the wrong approach
-    # # Find Data / Eat the soup
-    # for link in soup.select(pathOfListings)[0].find_all("a"):
-    #     cityName = ''.join([i for i in link.get('href').split("/")[-1] if not i.isdigit()]).replace("-", "")
-    #     extracted.append({"name": f"{cityName}", "link":f"{rootUrl}{link.get('href')}"})
-    
-
-    # Approach 2
-    # Use time's sleep method then send a request for each <url><pagination-number>
-    # Then scrape data similarly scince each page should be identical until the error page
-    while(True):
+    while(counter == 0):
         response = None
-        if not counter == 0:
+        if counter == 0:
             response = requests.get(urlOfAllListings)
             print(f"Scraping: {urlOfAllListings}")
         else:
@@ -53,11 +42,39 @@ def getListings():
             print(f"Scraping: {urlOfAllListings}/p:{counter}")
         
         soup = BeautifulSoup(response.text, "lxml")
-        
-        if soup.select(pathOfErrorMessage) == None:
-           for item in soup.find("div", pathOfListings).find_all("div", pathOfListingItem):
-               print("")
+        error = soup.select(pathOfErrorMessage)
+        if len(error) == 0:
+           for item in soup.find_all("div", pathOfListingItems):
+                buisinessName = item.find("a", pathToBuisinessName)
+                image = item.select(pathToImage)
+                website = item.find("a", pathToWebsite)
+                phoneNumber = item.find("a", pathToPhoneNumber)
+                description = item.find("div", pathToDescription)
+                # category = item.find("div", pathToCategories).find_all("a")
+                parsedAddress = stateParser(item.find(pathToAddress).get_text())
+                # print({"name": buisinessName, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })
+                if parsedAddress == None or buisinessName == None or phoneNumber == None:
+                        print("Skipping buisiness w/ out required values...")
+                        continue
+                buisinessName = buisinessName.get_text().strip()
+                phoneNumber = phoneNumber.get_text().strip()
+                description = description.get_text().strip()
+                website = website.get("href").strip()
+                print(image)
+                # category = category[0].get_text().strip()
+                state = parsedAddress["state"]
+                address = parsedAddress["address"]
+                if state not in extracted:
+                    extracted[state] = []
+                    print(extracted)
+                extracted[state].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+        else:
+            print("Done")
+            break
+
         print("Sleeping...")
-        time.sleep(60)
+        time.sleep(20)
+        counter += 1
+        
     print(extracted)
 
