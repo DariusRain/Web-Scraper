@@ -6,46 +6,41 @@ from bs4 import BeautifulSoup
 from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
 
 
-
+# This function returns a dictrionary see README for structured example.
 def getListings():
-
+    # TECHNICAL / ANALOGY
     # Get response class / Get soup ingredients
-    res = requests.get(urlOfAllListings)
+    # res = requests.get(urlOfAllListings)
 
-    # Parse Text / Cook the Soup!
-    soup = BeautifulSoup(res.text, 'lxml')
+    # # Parse Text / Cook the Soup!
+    # soup = BeautifulSoup(res.text, 'lxml')
 
-    # Initilize dicitonary to contain:
-    # Attempting to format in the following structure 
-    #   {   
-    #      "RI": {
-    #           "Providence": {
-    #                   "biz name": {
-    #                         address:"---",
-    #                         phoneNumber: "---",
-    #                         about: "---",
-    #                         imageUrl: "---"
-    #                       },
-    #               },
-    #    }, 
+    # Init Dictionary / Set the table
+    unitedStates = {}
 
-    extracted = {}
+    # Init counter for iterations of the future / Prepare for company  
     counter = 0
 
+    # While TRUE loop will break from inside due to unkown amount of iterations / While people are hungry
     while(counter == 0):
+        # Initial value to None to prevent operations on a NoneType value / Prepare for no visitors at all
         response = None
+
+        # If this is the first iteration & no dynamic paginated URL Required / If it is the first soup cooked
         if counter == 0:
+            # Get raw HTML data / Open up for buisiness
             response = requests.get(urlOfAllListings)
             print(f"Scraping: {urlOfAllListings}")
         else:
             response = requests.get(f"{urlOfAllListings}/p:{counter}")
             print(f"Scraping: {urlOfAllListings}/p:{counter}")
         
+        
         soup = BeautifulSoup(response.text, "lxml")
         error = soup.select(pathOfErrorMessage)
+        print(soup.prettify())
         if len(error) == 0:
            for item in soup.find_all("div", pathOfListingItems):
-                print(item)
                 buisinessName = item.find("a", pathToBuisinessName)
                 image = item.find("img", pathToImage)
                 website = item.find("a", pathToWebsite)
@@ -55,7 +50,11 @@ def getListings():
                 parsedAddress = stateParser(item.find(pathToAddress).get_text())
                 # print({"name": buisinessName, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })
                 if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None:
-                        print("Skipping buisiness w/ out required values...")
+                        # print({"name": buisinessName, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })
+                        if not buisinessName == None:
+                            print(f"Skipping {buisinessName} becuase of undesirable values...")
+                        else:
+                            print(f"Skipping unnamed business becuase of obvious undesirable values...")
                         continue
                 buisinessName = buisinessName.get_text().strip()
                 phoneNumber = phoneNumber.get_text().strip()
@@ -65,10 +64,10 @@ def getListings():
                 # category = category[0].get_text().strip()
                 state = parsedAddress["state"]
                 address = parsedAddress["address"]
-                if state not in extracted:
-                    extracted[state] = []
-                    print(extracted)
-                extracted[state].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                if state not in unitedStates:
+                    unitedStates[state] = []
+                    print(f"New state added: {state}")
+                unitedStates[state].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
         else:
             print("Done")
             break
@@ -77,5 +76,5 @@ def getListings():
         time.sleep(20)
         counter += 1
         
-    print(extracted)
+    print(unitedStates)
 
