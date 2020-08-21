@@ -38,7 +38,6 @@ def getListings():
         
         soup = BeautifulSoup(response.text, "lxml")
         error = soup.select(pathOfErrorMessage)
-        print(soup.prettify())
         if len(error) == 0:
            for item in soup.find_all("div", pathOfListingItems):
                 buisinessName = item.find("a", pathToBuisinessName)
@@ -46,22 +45,14 @@ def getListings():
                 website = item.find("a", pathToWebsite)
                 phoneNumber = item.find("a", pathToPhoneNumber)
                 description = item.find("div", pathToDescription)
-                # category = item.find("div", pathToCategories).find_all("a")
                 parsedAddress = stateParser(item.find(pathToAddress).get_text())
-                # print({"name": buisinessName, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })
                 if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None:
-                        # print({"name": buisinessName, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })
-                        if not buisinessName == None:
-                            print(f"Skipping {buisinessName} becuase of undesirable values...")
-                        else:
-                            print(f"Skipping unnamed business becuase of obvious undesirable values...")
-                        continue
+                    continue
                 buisinessName = buisinessName.get_text().strip()
                 phoneNumber = phoneNumber.get_text().strip()
                 description = description.get_text().strip()
                 website = website.get("href").strip()
                 image = image["data-src"].strip()
-                # category = category[0].get_text().strip()
                 state = parsedAddress["state"]
                 address = parsedAddress["address"]
                 if state not in unitedStates:
