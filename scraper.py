@@ -3,5 +3,5 @@
 # getCityLinks()
 
 from getAllListings import getListings
-
-getListings()
+from createJson import createJsonFile
+createJsonFile(getListings())
