@@ -54,11 +54,14 @@ def getListings():
                 website = website.get("href").strip()
                 image = image["data-src"].strip()
                 state = parsedAddress["state"]
+                city = parsedAddress["city"]
                 address = parsedAddress["address"]
                 if state not in unitedStates:
-                    unitedStates[state] = []
-                    print(f"New state added: {state}")
-                unitedStates[state].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                    unitedStates[state] = {}
+                    if city not in unitedStates[state]:
+                        unitedStates[state][city] = []
+                   # print(f"New state added: {state}")
+                unitedStates[state][city].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
         else:
             print("Done")
             break
@@ -67,5 +70,5 @@ def getListings():
         time.sleep(20)
         counter += 1
         
-    print(unitedStates)
+    return unitedStates
 
