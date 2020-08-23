@@ -67,9 +67,7 @@ def stateParser(string):
         if noInitial != -1:
             print(f"Address:{string}, Found: {state[1]}")
             string = string.replace(state[0], state[1])
-            arr = string.rsplit(",")
-            city = arr[-3].strip()
-            result = {"state": state[1], "city": city, "address": string}
+            result = {"state": state[1], "address": string}
             break
 
     return result
