@@ -3,7 +3,7 @@ import requests
 import time
 from addressParser import stateParser
 from bs4 import BeautifulSoup
-from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
+from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage1, pathOfErrorMessage2, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
 
 
 # This function returns a dictrionary see README for structured example.
@@ -37,8 +37,9 @@ def getListings():
         
         
         soup = BeautifulSoup(response.text, "lxml")
-        error = soup.select(pathOfErrorMessage)
-        if len(error) == 0:
+        error = soup.select(pathOfErrorMessage1)
+        error2 = soup.select(pathOfErrorMessage2)
+        if len(error) == 0 and len(error2) == 0:
            for item in soup.find_all("div", pathOfListingItems):
                 buisinessName = item.find("a", pathToBuisinessName)
                 image = item.find("img", pathToImage)
@@ -56,14 +57,19 @@ def getListings():
                 state = parsedAddress["state"]
                 city = parsedAddress["city"]
                 address = parsedAddress["address"]
+                print(parsedAddress)
                 if state not in unitedStates:
                     unitedStates[state] = {}
-                    if city not in unitedStates[state]:
-                        unitedStates[state][city] = []
+
+                if city not in unitedStates[state]:
+                    unitedStates[state][city] = []
                    # print(f"New state added: {state}")
                 unitedStates[state][city].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
         else:
-            print("Done")
+            if not len(error2) == 0:
+                print("Server has blocked scraper")
+            if not len(error) == 0:
+                print("Done")
             break
 
         print("Sleeping...")
