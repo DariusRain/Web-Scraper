@@ -1,41 +1,26 @@
-# Attempting to do an all in one, good suggestion @GaberialSherman
 import requests
 import time
 from addressParser import stateParser
 from bs4 import BeautifulSoup
 from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage1, pathOfErrorMessage2, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
+from createJson import appendToJsonFile
 
-
-# This function returns a dictrionary see README for structured example.
 def getListings():
-    # TECHNICAL / ANALOGY
-    # Get response class / Get soup ingredients
-    # res = requests.get(urlOfAllListings)
+    counter = int(input("Start on page: "))
+    
+    pageEnd = int(input("End on page: "))
 
-    # # Parse Text / Cook the Soup!
-    # soup = BeautifulSoup(res.text, 'lxml')
-
-    # Init Dictionary / Set the table
-    unitedStates = {}
-
-    # Init counter for iterations of the future / Prepare for company  
-    counter = 0
-
-    # While TRUE loop will break from inside due to unkown amount of iterations / While people are hungry
-    while(counter == 0):
-        # Initial value to None to prevent operations on a NoneType value / Prepare for no visitors at all
+    while(counter <= pageEnd):
+        
         response = None
-
-        # If this is the first iteration & no dynamic paginated URL Required / If it is the first soup cooked
+        
         if counter == 0:
-            # Get raw HTML data / Open up for buisiness
             response = requests.get(urlOfAllListings)
             print(f"Scraping: {urlOfAllListings}")
         else:
             response = requests.get(f"{urlOfAllListings}/p:{counter}")
             print(f"Scraping: {urlOfAllListings}/p:{counter}")
-        
-        
+
         soup = BeautifulSoup(response.text, "lxml")
         error = soup.select(pathOfErrorMessage1)
         error2 = soup.select(pathOfErrorMessage2)
@@ -55,16 +40,9 @@ def getListings():
                 website = website.get("href").strip()
                 image = image["data-src"].strip()
                 state = parsedAddress["state"]
-                city = parsedAddress["city"]
                 address = parsedAddress["address"]
-                print(parsedAddress)
-                if state not in unitedStates:
-                    unitedStates[state] = {}
-
-                if city not in unitedStates[state]:
-                    unitedStates[state][city] = []
-                   # print(f"New state added: {state}")
-                unitedStates[state][city].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                appendToJsonFile({"name": buisinessName, "state": state, "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                
         else:
             if not len(error2) == 0:
                 print("Server has blocked scraper")
@@ -73,8 +51,6 @@ def getListings():
             break
 
         print("Sleeping...")
-        time.sleep(20)
+        time.sleep(30)
         counter += 1
-        
-    return unitedStates
 
