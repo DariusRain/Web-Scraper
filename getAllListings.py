@@ -1,4 +1,5 @@
 # Attempting to do an all in one, good suggestion @GaberialSherman
+import json
 import requests
 import time
 from addressParser import stateParser
@@ -49,32 +50,39 @@ def getListings():
                 phoneNumber = item.find("a", pathToPhoneNumber)
                 description = item.find("div", pathToDescription)
                 parsedAddress = stateParser(item.find(pathToAddress).get_text())
-                print(parsedAddress)
-                if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None: 
-                    continue
-                buisinessName = buisinessName.get_text().strip()
-                phoneNumber = phoneNumber.get_text().strip()
-                description = description.get_text().strip()
+
+                newBiz = type("NewBiz", (object,), {})()
+                if not buisinessName == None:
+                    newBiz.name = buisinessName.get_text().strip()
+
+                if not phoneNumber == None:
+                    newBiz.phoneNumber = phoneNumber.get_text().strip()
+                
+                if not description == None:
+                    newBiz.description = description.get_text().strip()
+                
                 if not website == None:
-                    website = website.get("href").strip()
-                else:
-                    website = ""
-                image = image["data-src"].strip()
-                state = parsedAddress["state"]
-                address = parsedAddress["address"]
-                bizs.append({"name": buisinessName, "state":state, "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                    newBiz.website = website.get("href").strip()
+                
+                if not image == None:
+                    newBiz.image = image["data-src"].strip()
+
+                if not parsedAddress == None:
+                    newBiz.address = parsedAddress["address"]
+
+                bizs.append(json.dumps(newBiz.__dict__))    
                 
         else:
             if not len(error2) == 0:
                 print("Server has blocked scraper")
             if not len(error) == 0:
                 print("Done")
-            break
-
+            break 
+        # print(bizs)
         print("Sleeping...")
         createJsonFile(f"bizs-{counter}", bizs)
         time.sleep(300)
         counter += 1
 
-    return bizs
+    # return bizs
 
