@@ -50,7 +50,7 @@ def getListings():
                 description = item.find("div", pathToDescription)
                 parsedAddress = stateParser(item.find(pathToAddress).get_text())
                 print(parsedAddress)
-                if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None:
+                if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None: 
                     continue
                 buisinessName = buisinessName.get_text().strip()
                 phoneNumber = phoneNumber.get_text().strip()
@@ -73,7 +73,7 @@ def getListings():
 
         print("Sleeping...")
         createJsonFile(f"bizs-{counter}", bizs)
-        time.sleep(30)
+        time.sleep(300)
         counter += 1
 
     return bizs
