@@ -55,7 +55,10 @@ def getListings():
                 buisinessName = buisinessName.get_text().strip()
                 phoneNumber = phoneNumber.get_text().strip()
                 description = description.get_text().strip()
-                website = website.get("href").strip()
+                if not website == None:
+                    website = website.get("href").strip()
+                else:
+                    website = ""
                 image = image["data-src"].strip()
                 state = parsedAddress["state"]
                 address = parsedAddress["address"]
