@@ -59,13 +59,13 @@ def stateParser(string):
     for state in states:
         hasInitial = string.rfind(state[1])
         if hasInitial != -1:
-            print(f"Address:{string}, Found: {state[1]}")
+            # print(f"Address:{string}, Found: {state[1]}")
             result = {"state": state[1], "address": string}
             break
         
         noInitial = string.rfind(state[0])        
         if noInitial != -1:
-            print(f"Address:{string}, Found: {state[1]}")
+            # print(f"Address:{string}, Found: {state[1]}")
             string = string.replace(state[0], state[1])
             result = {"state": state[1], "address": string}
             break
