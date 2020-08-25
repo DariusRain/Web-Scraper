@@ -3,4 +3,5 @@ cityLinks.py
 getBizes.py
 scraped/*
 links.json
+region-count.json
 __pycache__
