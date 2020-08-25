@@ -2,4 +2,5 @@ secrets.py
 cityLinks.py
 getBizes.py
 scraped/*
+links.json
 __pycache__
