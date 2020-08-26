@@ -27,6 +27,9 @@ def getListings():
     with open('./links.json') as linksList:
         allLinks = json.load(linksList)
 
+    with open('./region-count.json') as countList:
+        allCounts = json.load(countList)
+
     dev = str(input("Enter Name: "))
 
     if dev in allLinks:
@@ -40,14 +43,17 @@ def getListings():
         # gets the page to scrape from the list of links one at a time
         base = region['link']
         # start with page 1 because excluding the number from the link is the same as using pagination, 
-        # if set to 0 it will grab page one twice and get a duplicate file
-        counter = 1
         # gets the maximum number of pages for a state in the same object as the link
         pageEnd = region['pages']
         # simply the name of the region
-        name = region['name']
+        rName = region['name']
         
-
+        # if set to 0 it will grab page one twice and get a duplicate file
+        counter = None
+        if rName in allCounts[dev]:
+            counter = allCounts[dev][rName]+1
+        else: 
+            counter = 1
         # While TRUE loop will break from inside due to unkown amount of iterations / While people are hungry
         while(counter <= pageEnd):
             # Initial value to None to prevent operations on a NoneType value / Prepare for no visitors at all
@@ -98,7 +104,7 @@ def getListings():
                 break 
             # print(curPage)
             print("Sleeping...")
-            createJsonFile(f"{name}-{counter}", curPage)
+            createJsonFile(counter, curPage, dev, rName)
             time.sleep(3)
             counter += 1
             curPage = []
