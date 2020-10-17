@@ -13,7 +13,6 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from secrets import urlOfAllListings, pathToListings, pathToLinks, pathToAllListings
 from appendToFile import appendFile
 
 # import requests

@@ -46,13 +46,29 @@ driver.find_element(By.CSS_SELECTOR, "< COPY_CSS_SELECTOR_OF_EL_IN_DEV_TOOLS >")
 print(driver.text)
 ```
 
+## Approach 4
+```python
+from secrets import *
+from createJson import createJsonFile
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options 
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from appendToFile import appendFile
+
+
+```
 ## Where I am at now?
 ```python
-# 10/8/20
-# Using Selenium to scrape
+# 10/16/20
+# Using Selenium to scrape still, but need to make use of the element.click() method for pagination
 # https://www.selenium.dev
 
-# Learned that you can use a web driver from a provider such as (Google, FireFox, Opera, etc.)
-# And the webdriver's use is to mimic a client so you can unlock way more capapblities to scrape & interact with the webpage dynamically.
+# 1st step is getting all the links of for each item, the link contains more details about the item
+# Once all links are obtained and put in a txt file then scrape each of them for the desired data
 
 ```
