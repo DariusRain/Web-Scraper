@@ -1,84 +1,141 @@
 import json
 import time
+import re
 from addressParser import stateParser
+from createHtml import createHtmlFile
 from secrets import *
 from createJson import createJsonFile
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from secrets import urlOfAllListings, pathToListings, pathToLinks, pathToAllListings
+from appendToFile import appendFile
+
 # import requests
 # from bs4 import BeautifulSoup
 options = Options()
-options.headless = True
-options.add_argument("--window-size=1920,1200")
+# options.add_argument("--window-size=1920,1200")
 
 driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
+
+# Scrape 4 ( Dynamic )
 
 # driver.quit()
 def getListings():
     
-    currPage = []
-    pageCount = 0
-    counter = 1
-    linkCount = 0
-    driver.get(urlOfAllListings + str(pageCount))
-    while(len(driver.find_elements(By.TAG_NAME, "div")) != 0):    
-        try:  
-            listing = driver.find_elements(By.CSS_SELECTOR, pathToListing)
-            newBiz = type("NewBiz", (object,), {})()
-            
-            # Debug 
-            # print(listing.text)            
-            
-            # print(counter, len(listing))
-            for item in listing:
-                try:
-                    newBiz.categories = []
-                    newBiz.contact = []
-                    phoneNumber = item.find_element(By.CSS_SELECTOR, pathToPhoneNumber).text.replace(".", "")
-                    newBiz.contact.append({ "type": "phoneNumber", "data": phoneNumber })
-                    newBiz.name = item.find_element(By.CSS_SELECTOR, pathToBuisinessName).text.split(". ")[1]
-                    newBiz.description = item.find_element(By.TAG_NAME, "p").text
-                    categoriesList = item.find_element(By.CSS_SELECTOR, pathToCategories).find_elements(By.TAG_NAME, "a")
-                    
-                    for category in categoriesList:
-                        newBiz.categories.append(category.text)
-                    
-                    contactList = item.find_element(By.CSS_SELECTOR, pathToContact).find_elements(By.TAG_NAME, "a")
+    return 0
 
-                    for contactType in contactList:
-                        propName = contactType.get_attribute("title").lower()
-                        if not propName == "":
-                            linkTo = contactType.get_attribute("href").replace("mailto:", "")
-                            newBiz.contact.append({ "type":  propName, "data": linkTo}) 
-                    
-                    newBiz.address = item.find_element(By.CSS_SELECTOR, pathToAddress).text
 
-                except NoSuchElementException:
-                    print("Had an issue getting feild")
+
+
+
+# def getLinks():
+#     print("Obtaining links...")
+#     driver.get(urlOfAllListings)
+#     pagCount = 2
+#     while(True):
+#         WebDriverWait(driver, 10).until(
+#             EC.visibility_of_element_located((By.CLASS_NAME, pathToAllListings)) 
+#         )
+
+#         listings = driver.find_element(By.CLASS_NAME, pathToAllListings)
+#         # print("Listing:", listingse)
+#         for listing in listings.find_elements(By.CLASS_NAME, pathToListings):
+#             link = listing.find_element(By.CLASS_NAME, pathToLinks).get_attribute("href")
+#             print(f"Obtained {link}")
+#             appendFile("links.txt", link)
+#             print("Listing:", listing.text)
+
+#         pagButtons = driver.find_elements(By.CLASS_NAME, pathToPagButtons)
+#         for button in pagButtons:
+#             if (len(re.findall("Next", button.text)) > 0):
+#                 print(f"button-{pagCount}-text: {button.text}")
+#                 button.click()
+#                 pagCount += 1
+#                 time.sleep(1)
+#                 break
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Scrape 3
+
+# def getListings():
+    # currPage = []
+    # pageCount = 0
+    # counter = 1
+    # linkCount = 0
+    # driver.get(urlOfAllListings + str(pageCount))
+    # while(len(driver.find_elements(By.TAG_NAME, "div")) != 0):    
+    #     try:  
+    #         listing = driver.find_elements(By.CSS_SELECTOR, pathToListing)
+    #         newBiz = type("NewBiz", (object,), {})()
+            
+    #         # Debug 
+    #         # print(listing.text)            
+            
+    #         # print(counter, len(listing))
+    #         for item in listing:
+    #             try:
+    #                 newBiz.categories = []
+    #                 newBiz.contact = []
+    #                 phoneNumber = item.find_element(By.CSS_SELECTOR, pathToPhoneNumber).text.replace(".", "")
+    #                 newBiz.contact.append({ "type": "phoneNumber", "data": phoneNumber })
+    #                 newBiz.name = item.find_element(By.CSS_SELECTOR, pathToBuisinessName).text.split(". ")[1]
+    #                 newBiz.description = item.find_element(By.TAG_NAME, "p").text
+    #                 categoriesList = item.find_element(By.CSS_SELECTOR, pathToCategories).find_elements(By.TAG_NAME, "a")
+                    
+    #                 for category in categoriesList:
+    #                     newBiz.categories.append(category.text)
+                    
+    #                 contactList = item.find_element(By.CSS_SELECTOR, pathToContact).find_elements(By.TAG_NAME, "a")
+
+    #                 for contactType in contactList:
+    #                     propName = contactType.get_attribute("title").lower()
+    #                     if not propName == "":
+    #                         linkTo = contactType.get_attribute("href").replace("mailto:", "")
+    #                         newBiz.contact.append({ "type":  propName, "data": linkTo}) 
+                    
+    #                 newBiz.address = item.find_element(By.CSS_SELECTOR, pathToAddress).text
+
+    #             except NoSuchElementException:
+    #                 print("Had an issue getting feild")
                     
                 
-                finally:
-                    currPage.append(json.dumps(newBiz.__dict__))   
-                    print("currPage length:", len(currPage))
-        finally:
+    #             finally:
+    #                 currPage.append(json.dumps(newBiz.__dict__))   
+    #                 print("currPage length:", len(currPage))
+    #     finally:
             
-            # Debug
-            # print("name:", newBiz.name)
-            # print("address:", newBiz.address)
-            # print("description:", newBiz.description)
-            # print("categories:", newBiz.categories)
-            # print("contact:", newBiz.contact)
-            # print("\n\nSleeping...")
+    #         # Debug
+    #         # print("name:", newBiz.name)
+    #         # print("address:", newBiz.address)
+    #         # print("description:", newBiz.description)
+    #         # print("categories:", newBiz.categories)
+    #         # print("contact:", newBiz.contact)
+    #         # print("\n\nSleeping...")
 
-            createJsonFile(counter, currPage)
-            time.sleep(3)
-            pageCount += 10
-            counter += 1
-            currPage.clear()
-            driver.get(urlOfAllListings + str(pageCount))
-    driver.quit()
+    #         createJsonFile(counter, currPage)
+    #         time.sleep(3)
+    #         pageCount += 10
+    #         counter += 1
+    #         currPage.clear()
+    #         driver.get(urlOfAllListings + str(pageCount))
+    # driver.quit()
    
 
 
