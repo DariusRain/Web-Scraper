@@ -5,5 +5,6 @@ getBizes.py
 scraped/*
 links.json
 links.txt
+debug.log
 region-count.json
 __pycache__
