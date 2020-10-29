@@ -55,7 +55,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
+#   This method alows the use of waiting until the element you are looking for apears in 
+#  the source before further code gets executed.
 from selenium.webdriver.support.ui import WebDriverWait
+
+# This is passed as an argument to the above method for example -> 
+# WebDriver( <DRIVER_VARIABLE>, <TIME-TO-WAIT> ).until( ( EC.visibility_of_element_located(By.<PATH_TYPE>, <PATH_TO_DYNAMIC_EL>) ) )
 from selenium.webdriver.support import expected_conditions as EC
 
 from appendToFile import appendFile

@@ -26,8 +26,59 @@ driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
 
 # driver.quit()
 def getListings():
-    
-    return 0
+    linksFile = open("links.txt", "r")
+    links = linksFile.readlines()
+    curPage = []
+    pageCount = 0
+    fileCount = 0
+    for link in links:
+        driver.get(link)
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, pathToDynamicElement))
+        )
+        newBiz = type("NewBiz", (object,), {})()
+        newBiz.name = ""
+        newBiz.image = ""
+        newBiz.description = ""
+        newBiz.categories = []
+        newBiz.contact = []
+        newBiz.hours = []
+        try:
+            newBiz.name = driver.find_element(By.CSS_SELECTOR, pathToBizName).text
+            for contactItem in driver.find_element(By.CSS_SELECTOR, pathToContact).find_elements(By.TAG_NAME, "li"):
+                contactType = contactItem.find_element(By.CLASS_NAME, pathToType).text.lower()
+                contactValue = contactItem.find_element(By.CLASS_NAME, pathToValue).text
+                print(contactType)
+                if (contactType == "tags"):
+                    categories = contactValue.replace("\\s+", "").split(",")
+                    newBiz.categories = categories
+                else:
+                    newBiz.contact.append({ "type": contactType, "value": contactValue })
+                
+
+            for day in driver.find_element(By.CSS_SELECTOR, pathToHours).find_elements(By.TAG_NAME, "li"):
+                dayName = day.find_element(By.CLASS_NAME, pathToType).text
+                dayHours = day.find_element(By.CLASS_NAME, pathToValue).text
+                newBiz.hours.append({ "day": dayName, "hours": dayHours })
+            newBiz.description = driver.find_element(By.CSS_SELECTOR, pathToDescription).text
+            newBiz.image = driver.find_element(By.CSS_SELECTOR, pathToImage).get_attribute("src") 
+
+
+        except NoSuchElementException:
+            print("Error finding an element:", NoSuchElementException)
+
+        finally:
+            if (newBiz.name != "" and len(newBiz.contact) > 0 ):
+                curPage.append(json.dumps(newBiz.__dict__)) 
+                pageCount += 1
+                if (pageCount == 10):
+                    pageCount = 0
+                    fileCount += 1
+                    createJsonFile(fileCount, curPage)
+                    curPage.clear()
+                    time.sleep(2)
+            else:
+                print("No name or contact info skipping biz...")    
 
 
 
