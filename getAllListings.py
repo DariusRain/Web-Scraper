@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-
+from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -22,63 +22,112 @@ options = Options()
 
 driver = webdriver.Chrome(options=options, executable_path=DRIVER_PATH)
 
-# Scrape 4 ( Dynamic )
 
-# driver.quit()
+
+# Scrape 5 ( Dynamic )
+
 def getListings():
-    linksFile = open("links.txt", "r")
-    links = linksFile.readlines()
-    curPage = []
+    driver.get(urlOfAllListings)    
+    currPage = []
     pageCount = 0
     fileCount = 0
-    for link in links:
-        driver.get(link)
+    pagCount = 2
+    while(True):
         WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, pathToDynamicElement))
+            EC.visibility_of_element_located((By.CSS_SELECTOR, pathToAllListings)),
         )
-        newBiz = type("NewBiz", (object,), {})()
-        newBiz.name = ""
-        newBiz.image = ""
-        newBiz.description = ""
-        newBiz.categories = []
-        newBiz.contact = []
-        newBiz.hours = []
-        try:
-            newBiz.name = driver.find_element(By.CSS_SELECTOR, pathToBizName).text
-            for contactItem in driver.find_element(By.CSS_SELECTOR, pathToContact).find_elements(By.TAG_NAME, "li"):
-                contactType = contactItem.find_element(By.CLASS_NAME, pathToType).text.lower()
-                contactValue = contactItem.find_element(By.CLASS_NAME, pathToValue).text
-                print(contactType)
-                if (contactType == "tags"):
-                    categories = contactValue.replace("\\s+", "").split(",")
-                    newBiz.categories = categories
-                else:
-                    newBiz.contact.append({ "type": contactType, "value": contactValue })
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, pathToDescription)) 
+        )
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, pathToPhoneNumber)),
+        )
+        listings = driver.find_element(By.CSS_SELECTOR, pathToAllListings)
+        for listing in listings.find_elements(By.CLASS_NAME, pathToListings):
+            try: 
+                newBiz = type("NewBiz", (object,), {})()
+                # print(listing.text)
+                newBiz.name = ""
+                newBiz.image = ""
+                newBiz.description = ""
+                newBiz.categories = []
+                newBiz.contact = []
+                newBiz.hours = []
+                newBiz.name = re.sub("Visitor Count \\d", "", listing.find_element(By.CSS_SELECTOR, pathToBizName).text).strip()
+                print("Name: " + newBiz.name + "\n")
+                newBiz.description = re.sub("Description not added|&amp;", "", listing.find_element(By.CSS_SELECTOR, pathToDescription).text).strip()
+                print("Description: " + newBiz.description + "\n")
+                newBiz.categories.append({"type": "address", "value": listing.find_element(By.CSS_SELECTOR, pathToAddress).text.strip()})
+                newBiz.categories.append({"type": "phoneNumber", "value": listing.find_element(By.CSS_SELECTOR, pathToPhoneNumber).text.strip()})
+                try:
+                    print("Obtained website")
+                    newBiz.categories.append({"type": "website", "value": re.sub("['|\\)]", "", listing.find_element(By.CSS_SELECTOR, pathToWebsite).get_attribute("onclick").split(",")[-1]).strip()})
+                except NoSuchElementException:
+                    print("No website")
+
+            except StaleElementReferenceException:
+                print("Stale element")
+                continue
+            #     # WebDriverWait(driver, 10, ignored_exceptions=(NoSuchElementException,StaleElementReferenceException,)).until(EC.presence_of_element_located((By.CSS_SELECTOR, pathToWebsite)))
+            # finally:
+            #     currPage.append(json.dumps(newBiz.__dict__))   
+            #     print("currPage length:", len(currPage))
+        print(pagCount)
+        button = driver.find_element(By.CSS_SELECTOR, pathToNextButton)
+        button.click()
+        pagCount += 1
+        time.sleep(1)
+
+
+
+
+# # Scrape 4 ( Dynamic )
+
+# # driver.quit()
+# def getListings():
+
+#     curPage = []
+#     pageCount = 0
+#     fileCount = 0
+#     for link in links:
+#         driver.get(link)
+
+#         try:
+#             newBiz.name = driver.find_element(By.CSS_SELECTOR, pathToBizName).text
+#             for contactItem in driver.find_element(By.CSS_SELECTOR, pathToContact).find_elements(By.TAG_NAME, "li"):
+#                 contactType = contactItem.find_element(By.CLASS_NAME, pathToType).text.lower()
+#                 contactValue = contactItem.find_element(By.CLASS_NAME, pathToValue).text
+#                 print(contactType)
+#                 if (contactType == "tags"):
+#                     categories = contactValue.replace("\\s+", "").split(",")
+#                     newBiz.categories = categories
+#                 else:
+#                     newBiz.contact.append({ "type": contactType, "value": contactValue })
                 
 
-            for day in driver.find_element(By.CSS_SELECTOR, pathToHours).find_elements(By.TAG_NAME, "li"):
-                dayName = day.find_element(By.CLASS_NAME, pathToType).text
-                dayHours = day.find_element(By.CLASS_NAME, pathToValue).text
-                newBiz.hours.append({ "day": dayName, "hours": dayHours })
-            newBiz.description = driver.find_element(By.CSS_SELECTOR, pathToDescription).text
-            newBiz.image = driver.find_element(By.CSS_SELECTOR, pathToImage).get_attribute("src") 
+#             for day in driver.find_element(By.CSS_SELECTOR, pathToHours).find_elements(By.TAG_NAME, "li"):
+#                 dayName = day.find_element(By.CLASS_NAME, pathToType).text
+#                 dayHours = day.find_element(By.CLASS_NAME, pathToValue).text
+#                 newBiz.hours.append({ "day": dayName, "hours": dayHours })
+#             newBiz.description = driver.find_element(By.CSS_SELECTOR, pathToDescription).text
+#             newBiz.image = driver.find_element(By.CSS_SELECTOR, pathToImage).get_attribute("src") 
 
 
-        except NoSuchElementException:
-            print("Error finding an element:", NoSuchElementException)
+#         except NoSuchElementException:
+#             print("Error finding an element:", NoSuchElementException)
 
-        finally:
-            if (newBiz.name != "" and len(newBiz.contact) > 0 ):
-                curPage.append(json.dumps(newBiz.__dict__)) 
-                pageCount += 1
-                if (pageCount == 10):
-                    pageCount = 0
-                    fileCount += 1
-                    createJsonFile(fileCount, curPage)
-                    curPage.clear()
-                    time.sleep(2)
-            else:
-                print("No name or contact info skipping biz...")    
+#         finally:
+#             if (newBiz.name != "" and len(newBiz.contact) > 0 ):
+#                 curPage.append(json.dumps(newBiz.__dict__)) 
+#                 pageCount += 1
+#                 if (pageCount == 10):
+#                     pageCount = 0
+#                     fileCount += 1
+#                     createJsonFile(fileCount, curPage)
+#                     curPage.clear()
+#                     time.sleep(2)
+#             else:
+#                 print("No name or contact info skipping biz...")    
 
 
 
