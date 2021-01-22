@@ -1,4 +1,5 @@
 secrets.py
 cityLinks.py
 getBizes.py
+scraped/*
 __pycache__
