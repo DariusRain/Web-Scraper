@@ -3,5 +3,4 @@
 # getCityLinks()
 
 from getAllListings import getListings
-
 getListings()

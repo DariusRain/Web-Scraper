@@ -3,8 +3,8 @@ import requests
 import time
 from addressParser import stateParser
 from bs4 import BeautifulSoup
-from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
-
+from secrets import urlOfAllListings, pathOfListings, pathOfErrorMessage1, pathOfErrorMessage2, pathOfListingItems, pathToBuisinessName, pathToAddress, pathToCategories, pathToPhoneNumber, pathToDescription, pathToImage, pathToWebsite
+from createJson import createJsonFile
 
 # This function returns a dictrionary see README for structured example.
 def getListings():
@@ -16,13 +16,15 @@ def getListings():
     # soup = BeautifulSoup(res.text, 'lxml')
 
     # Init Dictionary / Set the table
-    unitedStates = {}
+    bizs = []
 
     # Init counter for iterations of the future / Prepare for company  
-    counter = 0
+    counter = int(input("Start on page: "))
+    
+    pageEnd = int(input("End on page: "))
 
     # While TRUE loop will break from inside due to unkown amount of iterations / While people are hungry
-    while(counter == 0):
+    while(counter <= pageEnd):
         # Initial value to None to prevent operations on a NoneType value / Prepare for no visitors at all
         response = None
 
@@ -37,8 +39,9 @@ def getListings():
         
         
         soup = BeautifulSoup(response.text, "lxml")
-        error = soup.select(pathOfErrorMessage)
-        if len(error) == 0:
+        error = soup.select(pathOfErrorMessage1)
+        error2 = soup.select(pathOfErrorMessage2)
+        if len(error) == 0 and len(error2) == 0:
            for item in soup.find_all("div", pathOfListingItems):
                 buisinessName = item.find("a", pathToBuisinessName)
                 image = item.find("img", pathToImage)
@@ -46,6 +49,7 @@ def getListings():
                 phoneNumber = item.find("a", pathToPhoneNumber)
                 description = item.find("div", pathToDescription)
                 parsedAddress = stateParser(item.find(pathToAddress).get_text())
+                print(parsedAddress)
                 if parsedAddress == None or buisinessName == None or phoneNumber == None or image == None:
                     continue
                 buisinessName = buisinessName.get_text().strip()
@@ -55,17 +59,19 @@ def getListings():
                 image = image["data-src"].strip()
                 state = parsedAddress["state"]
                 address = parsedAddress["address"]
-                if state not in unitedStates:
-                    unitedStates[state] = []
-                    print(f"New state added: {state}")
-                unitedStates[state].append({"name": buisinessName,  "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                bizs.append({"name": buisinessName, "state":state, "address": address, "phoneNumber": phoneNumber, "description": description, "imageUrl": image, "website": website })    
+                
         else:
-            print("Done")
+            if not len(error2) == 0:
+                print("Server has blocked scraper")
+            if not len(error) == 0:
+                print("Done")
             break
 
         print("Sleeping...")
-        time.sleep(20)
+        createJsonFile(f"bizs-{counter}", bizs)
+        time.sleep(30)
         counter += 1
-        
-    print(unitedStates)
+
+    return bizs
 
