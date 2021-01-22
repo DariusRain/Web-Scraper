@@ -1,0 +1,2 @@
+from getAllListingsOffline import getListingsOffline
+getListingsOffline()
