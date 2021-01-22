@@ -8,8 +8,7 @@ from createJson import createJsonFile
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options 
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import *
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -31,8 +30,16 @@ def getListings():
     currPage = []
     pageCount = 0
     fileCount = 0
-    pagCount = 2
-    while(True):
+    itemCount = 0
+    skipper = 0
+    omega = 8213
+    alpha = 7207
+    while(alpha < omega):
+        if omega == 8213:
+            WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.CSS_SELECTOR, pathToLastButton)),
+            )
+            driver.find_element(By.CSS_SELECTOR, pathToLastButton).click()
         WebDriverWait(driver, 10).until(
             EC.visibility_of_element_located((By.CSS_SELECTOR, pathToAllListings)),
         )
@@ -57,26 +64,44 @@ def getListings():
                 print("Name: " + newBiz.name + "\n")
                 newBiz.description = re.sub("Description not added|&amp;", "", listing.find_element(By.CSS_SELECTOR, pathToDescription).text).strip()
                 print("Description: " + newBiz.description + "\n")
-                newBiz.categories.append({"type": "address", "value": listing.find_element(By.CSS_SELECTOR, pathToAddress).text.strip()})
-                newBiz.categories.append({"type": "phoneNumber", "value": listing.find_element(By.CSS_SELECTOR, pathToPhoneNumber).text.strip()})
+                addrVal = listing.find_element(By.CSS_SELECTOR, pathToAddress).text.strip()
+                newBiz.contact.append({"type": "address", "value": addrVal})
+                phoneVal = listing.find_element(By.CSS_SELECTOR, pathToPhoneNumber).text.strip()
+                newBiz.contact.append({"type": "phoneNumber", "value": phoneVal})
                 try:
                     print("Obtained website")
-                    newBiz.categories.append({"type": "website", "value": re.sub("['|\\)]", "", listing.find_element(By.CSS_SELECTOR, pathToWebsite).get_attribute("onclick").split(",")[-1]).strip()})
+                    webVal = re.sub("['|\\)]", "", listing.find_element(By.CSS_SELECTOR, pathToWebsite).get_attribute("onclick").split(",")[-1]).strip()
+                    newBiz.contact.append({"type": "website", "value": webVal})
                 except NoSuchElementException:
                     print("No website")
-
+                for el in newBiz.categories:
+                    print("Type: " + el.type + " Value: " + el.value)
             except StaleElementReferenceException:
                 print("Stale element")
                 continue
+            except ElementClickInterceptedException:
+                print("Click interception")
+                continue
+            except NoSuchElementException:
+                print("No such element(s)")
+                continue
             #     # WebDriverWait(driver, 10, ignored_exceptions=(NoSuchElementException,StaleElementReferenceException,)).until(EC.presence_of_element_located((By.CSS_SELECTOR, pathToWebsite)))
-            # finally:
-            #     currPage.append(json.dumps(newBiz.__dict__))   
-            #     print("currPage length:", len(currPage))
-        print(pagCount)
-        button = driver.find_element(By.CSS_SELECTOR, pathToNextButton)
+            finally:
+                if (newBiz.name != "" and len(newBiz.contact) > 0 ):
+                    currPage.append(json.dumps(newBiz.__dict__)) 
+                    itemCount += 1
+                    if (itemCount == 10):
+                        fileCount += 1
+                        itemCount *= 0
+                        createJsonFile(omega, currPage)
+                        currPage.clear()
+                else:
+                    print("No name or contact info skipping biz...")  
+
+        button = driver.find_element(By.CSS_SELECTOR, pathToPreviousButton)
         button.click()
-        pagCount += 1
         time.sleep(1)
+        omega -= 1
 
 
 
