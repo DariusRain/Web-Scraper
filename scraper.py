@@ -2,5 +2,5 @@
 # from cityLinks import getCityLinks
 # getCityLinks()
 
-from getAllListings import getListings
-getListings()
+from getAllListings import getListings, getLinks
+getLinks()
